@@ -123,7 +123,7 @@
 #' values to grid search over. You can run hyperparameter optimization in parallel by
 #' setting the \code{n_jobs}
 #' parameter to however many jobs you would like to run in
-#' parallel. \code{n_jobs} defaults to 1 (no parallelization).
+#' parallel. \code{n_jobs} defaults to 4.
 #'
 #'  \href{https://arxiv.org/abs/1603.06560}{Hyperband}
 #' is an efficient approach to hyperparameter optimization, and
@@ -171,6 +171,40 @@
 #' Provide an \code{output_table} (and optionally an \code{output_db},
 #' if it's different from \code{database_name}) to copy these predictions into a
 #' table on Redshift.
+#' @section Stacking:
+#'
+#' The \code{"stacking_classifier"} model stacks
+#' together the \code{"sparse_logistic"}, \code{"gradient_boosting_classifier"},
+#' and \code{"random_forest_classifier"} models, using altered defaults as
+#' listed for each in the \code{"Altered Defaults"} column of the table
+#' above. The models are combined using a pipeline
+#' containing a \href{http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.Normalizer.html#sklearn.preprocessing.Normalizer}{Normalizer}
+#' step, followed by a \href{http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegressionCV.html}{LogisticRegressionCV}
+#' with \code{penalty='l2'} and \code{tol=1e-08}. The
+#' \code{"stacking_regressor"} works similarly, stacking together the
+#' \code{"sparse_linear_regressor"}, \code{"gradient_boosting_regressor"},
+#' and \code{"random_forest_regressor"} models, and combining them using
+#' \href{https://github.com/civisanalytics/civisml-extensions}{NonNegativeLinearRegression}.
+#'
+#' @section Hyperparameter Tuning:
+#' You can tune hyperparamters using one of two methods: grid search or
+#' hyperband. CivisML will perform grid search if you pass a list
+#' of hyperparameters to the \code{cross_validation_parameters} parameter, where list elements are
+#' hyperparameter names, and the values are vectors of hyperparameter
+#' values to grid search over. You can run grid search in parallel by
+#' setting the \code{n_jobs}
+#' parameter to however many jobs you would like to run in
+#' parallel. \code{n_jobs} defaults to 1 (no parallelization).
+#'
+#'  \href{https://arxiv.org/abs/1603.06560}{Hyperband}
+#' is an efficient approach to hyperparameter optimization, and
+#' *recommended over grid search where possible*. CivisML will perform
+#' hyperband optimization if you pass the string \code{"hyperband"} to
+#' \code{cross_validation_parameters}. Hyperband is currently only supported for the following models:
+#' \code{"gradient_boosting_classifier", "random_forest_classifier",
+#' "extra_trees_classifier", "multilayer_perceptron_classifier",
+#' "gradient_boosting_regressor", "random_forest_regressor",
+#' "extra_trees_regressor"}, and \code{"multilayer_perceptron_regressor"}.
 #'
 #' @return A \code{civis_ml} object, a list containing the following elements:
 #' \item{job}{job metadata from \code{\link{scripts_get_custom}}.}
@@ -262,7 +296,7 @@ civis_ml <- function(x,
                      notifications = NULL,
                      polling_interval = NULL,
                      validation_data = c('train', 'skip'),
-                     n_jobs = NULL,
+                     n_jobs = 4,
                      verbose = FALSE) {
 
   UseMethod("civis_ml", x)
