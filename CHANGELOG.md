@@ -1,10 +1,16 @@
 # Changelog
 
-## [1.5.1] - Unreleased
+## [1.6.0] - Unreleased
 
 ### Changed
 
 - Hyperband is now supported for stacking estimators in `civis_ml`. Fixes #131.
+- devtools is no longer required for installation, only suggested. roxygen2 >=6.1.0 is required. Fixes #99.
+
+### Fixed
+
+- Added Encoding: UTF-8 to 'DESCRIPTION' to fix R CMD CHECK warning from changes to 
+roxygen2 6.1.0. Fixes #133.
 
 ## [1.5.0] - 2018-05-20
 
